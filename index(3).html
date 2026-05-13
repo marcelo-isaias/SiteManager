@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>SiteManager</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+</head>
+
+<body>
+
+    <!---------------------HTML CAMPOS -->
+
+<h1>SiteManager</h1>
+
+<input
+    type="text"
+    id="siteInput"
+    list="listaSites"
+    placeholder="Digite o nome do site"
+/>
+
+<datalist id="listaSites"></datalist>
+
+<br><br>
+
+<button onclick="buscarSite()">
+    Buscar
+</button>
+
+<button onclick="dirigir()">
+    Dirigir
+</button>
+
+<button onclick="info()">
+    Informações
+</button>
+
+<button onclick="resetar()">
+    Reset
+</button>
+
+<hr>
+
+<p id="tecnico"></p>
+<p id="area"></p>
+<p id="endereco"></p>
+
+
+
+    <!----------- SCRIPT -->
+
+<script>
+
+let sites = [];
+
+async function carregarDados() {
+
+    const url =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn5TlzJClQub1OZg5Y37_uCLZk4ahi66pmeUoCqWXvWazOHJ7Hr8xmtPc42n3Y_n5OyNx9frgIAjGj/pub?output=csv";
+
+    const resposta = await fetch(url);
+
+    const csv = await resposta.text();
+
+    const resultado = Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true
+    });
+
+    sites = resultado.data;
+
+    configurarAutocomplete();
+}
+
+function configurarAutocomplete() {
+
+    const datalist =
+        document.getElementById("listaSites");
+
+    datalist.innerHTML = "";
+
+    sites.forEach(site => {
+
+        if (!site.site) return;
+
+        const option =
+            document.createElement("option");
+
+        option.value = site.site;
+
+        datalist.appendChild(option);
+    });
+}
+
+function buscarSite() {
+
+    const nome = document
+        .getElementById("siteInput")
+        .value
+        .trim()
+        .toUpperCase();
+
+    const site = sites.find(
+        s => s.site?.toUpperCase() === nome
+    );
+
+    if (!site) {
+
+        alert("Site não encontrado");
+        return;
+    }
+
+    document.getElementById("tecnico").innerText =
+        "Técnico: " + (site.tecnico || "");
+
+    document.getElementById("area").innerText =
+        "Área: " + (site.area || "");
+
+    document.getElementById("endereco").innerText =
+        "Endereço: " + (site.endereco || "");
+
+    window.siteAtual = site;
+}
+
+function dirigir() {
+
+    if (!window.siteAtual) return;
+
+    let url = "";
+
+    if (
+        window.siteAtual.latitude &&
+        window.siteAtual.longitude
+    ) {
+
+        url =
+            "https://www.google.com/maps?q=" +
+            window.siteAtual.latitude +
+            "," +
+            window.siteAtual.longitude;
+
+    } else {
+
+        url =
+            "https://www.google.com/maps/search/?api=1&query=" +
+            encodeURIComponent(
+                window.siteAtual.endereco
+            );
+    }
+
+    window.open(url, "_blank");
+}
+
+function info() {
+
+    if (!window.siteAtual) return;
+
+    let texto = "";
+
+    Object.keys(window.siteAtual).forEach(chave => {
+
+        let valor = window.siteAtual[chave];
+
+        if (valor && valor !== "0") {
+
+            texto +=
+                "<b>" +
+                chave.toUpperCase() +
+                ":</b> " +
+                valor +
+                "<br><br>";
+        }
+    });
+
+    document.getElementById("janelaInfoTexto")
+        .innerHTML = texto;
+
+    document.getElementById("janelaInfo")
+        .style.display = "block";
+}
+
+function resetar() {
+
+    document.getElementById("siteInput").value = "";
+
+    document.getElementById("tecnico").innerText = "";
+    document.getElementById("area").innerText = "";
+    document.getElementById("endereco").innerText = "";
+
+    window.siteAtual = null;
+}
+
+carregarDados();
+
+</script>
+
+<div id="janelaInfo"
+     style="
+        display:none;
+        position:fixed;
+        top:5%;
+        left:5%;
+        width:90%;
+        height:85%;
+        background:white;
+        border:1px solid #999;
+        padding:20px;
+        overflow:auto;
+        z-index:9999;
+        box-shadow:0 0 15px rgba(0,0,0,0.4);
+">
+
+    <button onclick="
+        document.getElementById('janelaInfo')
+        .style.display='none';
+    ">
+        Fechar
+    </button>
+
+    <hr>
+
+    <div id="janelaInfoTexto"></div>
+
+</div>
+
+</body>
+
+</html>
