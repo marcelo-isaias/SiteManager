@@ -3,14 +3,69 @@
 
 <head>
     <meta charset="UTF-8">
+
     <title>SiteManager</title>
+
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <style>
+
+    body {
+        font-family: Arial;
+        padding: 20px;
+        background: #f5f5f5;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 8px;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    .result {
+        margin-top: 15px;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 5px;
+    }
+
+    .buttons button {
+        flex: 1;
+    }
+
+    #infoBox {
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-line;
+        background: #eee;
+        padding: 10px;
+        margin-top: 10px;
+        display: none;
+    }
+
+    </style>
 
 </head>
 
 <body>
 
-    <!---------------------HTML CAMPOS -->
+<body>
+
+<div class="container">
 
 <h1>SiteManager</h1>
 
@@ -23,7 +78,7 @@
 
 <datalist id="listaSites"></datalist>
 
-<br><br>
+<div class="buttons">
 
 <button onclick="buscarSite()">
     Buscar
@@ -41,13 +96,19 @@
     Reset
 </button>
 
+</div>
+
 <hr>
+
+<div class="result">
 
 <p id="tecnico"></p>
 <p id="area"></p>
 <p id="endereco"></p>
 
+</div>
 
+</div>
 
     <!----------- SCRIPT -->
 
