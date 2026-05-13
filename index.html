@@ -1,3 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>SiteManager</title>
+</head>
+
+<body>
+
+    <!---------------------HTML CAMPOS -->
+
+<h1>SiteManager</h1>
+
+<input
+    type="text"
+    id="siteInput"
+    list="listaSites"
+    placeholder="Digite o nome do site"
+/>
+
+<datalist id="listaSites"></datalist>
+
+<br><br>
+
+<button onclick="buscarSite()">
+    Buscar
+</button>
+
+<button onclick="dirigir()">
+    Dirigir
+</button>
+
+<button onclick="info()">
+    Informações
+</button>
+
+<button onclick="resetar()">
+    Reset
+</button>
+
+<hr>
+
+<p id="tecnico"></p>
+<p id="area"></p>
+<p id="endereco"></p>
+
+
+
+    <!----------- SCRIPT -->
+
 <script>
 
 let sites = [];
@@ -17,7 +68,11 @@ async function carregarDados() {
 
     for (let i = 1; i < linhas.length; i++) {
 
-        const dados = linhas[i].split(",");
+        /* --const dados = linhas[i].split(","); */
+	
+        const dados = linhas[i]
+            
+           .match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
 
         let obj = {};
 
@@ -140,3 +195,8 @@ function resetar() {
 carregarDados();
 
 </script>
+
+
+</body>
+
+</html>
