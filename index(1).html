@@ -1,0 +1,142 @@
+<script>
+
+let sites = [];
+
+async function carregarDados() {
+
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn5TlzJClQub1OZg5Y37_uCLZk4ahi66pmeUoCqWXvWazOHJ7Hr8xmtPc42n3Y_n5OyNx9frgIAjGj/pub?output=csv";
+
+    const resposta = await fetch(url);
+    const csv = await resposta.text();
+
+    const linhas = csv.split("\n");
+
+    const headers = linhas[0]
+        .split(",")
+        .map(h => h.trim().toLowerCase());
+
+    for (let i = 1; i < linhas.length; i++) {
+
+        const dados = linhas[i].split(",");
+
+        let obj = {};
+
+        headers.forEach((header, index) => {
+            obj[header] = dados[index]
+                ? dados[index].replace(/"/g, "").trim()
+                : "";
+        });
+
+        sites.push(obj);
+    }
+
+    configurarAutocomplete();
+}
+
+function configurarAutocomplete() {
+
+    const datalist = document.getElementById("listaSites");
+
+    sites.forEach(site => {
+
+        const option = document.createElement("option");
+        option.value = site.site;
+
+        datalist.appendChild(option);
+    });
+}
+
+function buscarSite() {
+
+    const nome = document
+        .getElementById("siteInput")
+        .value
+        .trim()
+        .toUpperCase();
+
+    const site = sites.find(
+        s => s.site?.toUpperCase() === nome
+    );
+
+    if (!site) {
+
+        alert("Site não encontrado");
+        return;
+    }
+
+    document.getElementById("tecnico").innerText =
+        "Técnico: " + (site.tecnico || "");
+
+    document.getElementById("area").innerText =
+        "Área: " + (site.area || "");
+
+    document.getElementById("endereco").innerText =
+        "Endereço: " + (site.endereco || "");
+
+    window.siteAtual = site;
+}
+
+function dirigir() {
+
+    if (!window.siteAtual) return;
+
+    let url = "";
+
+    if (
+        window.siteAtual.latitude &&
+        window.siteAtual.longitude
+    ) {
+
+        url =
+            "https://www.google.com/maps?q=" +
+            window.siteAtual.latitude +
+            "," +
+            window.siteAtual.longitude;
+
+    } else {
+
+        url =
+            "https://www.google.com/maps/search/?api=1&query=" +
+            encodeURIComponent(window.siteAtual.endereco);
+    }
+
+    window.open(url, "_blank");
+}
+
+function info() {
+
+    if (!window.siteAtual) return;
+
+    let texto = "";
+
+    Object.keys(window.siteAtual).forEach(chave => {
+
+        let valor = window.siteAtual[chave];
+
+        if (valor && valor !== "0") {
+
+            texto +=
+                chave.toUpperCase() +
+                ": " +
+                valor +
+                "\n\n";
+        }
+    });
+
+    alert(texto);
+}
+
+function resetar() {
+
+    document.getElementById("siteInput").value = "";
+
+    document.getElementById("tecnico").innerText = "";
+    document.getElementById("area").innerText = "";
+    document.getElementById("endereco").innerText = "";
+
+    window.siteAtual = null;
+}
+
+carregarDados();
+
+</script>
