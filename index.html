@@ -208,6 +208,7 @@
         <input
             type="text"
             id="loginUsuario"
+            onkeypress="teclaEnter(event)"
             placeholder="Usuário"
             style="
                 width:100%;
@@ -222,6 +223,7 @@
         <input
             type="password"
             id="loginSenha"
+            onkeypress="teclaEnter(event)"
             placeholder="Senha"
             style="
                 width:100%;
@@ -330,6 +332,8 @@
         <input
             type="text"
             id="siteInput"
+            onkeypress="if(event.key==='Enter') buscarSite()"
+        />
             list="listaSites"
             placeholder="Digite o nome do site"
         >
@@ -413,6 +417,31 @@
     </div>
 
     <div id="janelaInfoTexto"></div>
+    
+
+<div style="
+    padding:20px;
+    border-top:1px solid #ddd;
+">
+
+    <button
+        onclick="solicitarAcesso()"
+        style="
+            background:#25d366;
+            color:white;
+            border:none;
+            padding:12px 20px;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:bold;
+            width:100%;
+            font-size:16px;
+        "
+    >
+        Solicitar Acesso via WhatsApp
+    </button>
+
+</div>
 
 </div>
 
@@ -425,6 +454,13 @@
 <script>
 
 let sites = [];
+    function teclaEnter(event) {
+
+    if (event.key === "Enter") {
+
+        fazerLogin();
+      }
+    }
 
     function fazerLogin() {
 
@@ -612,7 +648,35 @@ function resetar() {
 
     window.siteAtual = null;
 }
+function solicitarAcesso() {
 
+    if (!window.siteAtual) return;
+
+    const numero =
+        "5511999999999";
+
+    const mensagem =
+        "Olá, preciso de acesso ao site:\n\n" +
+
+        "SITE: " +
+        (window.siteAtual.site || "") +
+        "\n\n" +
+
+        "ID DETENTORA: " +
+        (window.siteAtual.iddetentora || "") +
+        "\n\n" +
+
+        "ENDEREÇO: " +
+        (window.siteAtual.endereco || "");
+
+    const url =
+        "https://wa.me/" +
+        numero +
+        "?text=" +
+        encodeURIComponent(mensagem);
+
+    window.open(url, "_blank");
+}
 carregarDados();
 
 </script>
