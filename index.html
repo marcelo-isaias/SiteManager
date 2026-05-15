@@ -452,6 +452,14 @@
 <script>
 
 let sites = [];
+const contatosDetentora = {
+
+   "HIGHLINE": "+5511999171760",
+
+    "TBSA": "+552123919487"
+  };
+
+    
     function teclaEnter(event) {
 
     if (event.key === "Enter") {
@@ -650,11 +658,25 @@ function solicitarAcesso() {
 
     if (!window.siteAtual) return;
 
+    const detentora =
+        (window.siteAtual.detentora || "")
+        .toUpperCase()
+        .trim();
+
     const numero =
-        "5511999999999";
+        contatosDetentora[detentora];
+
+    if (!numero) {
+
+        alert(
+            "Nenhum contato cadastrado para esta detentora."
+        );
+
+        return;
+    }
 
     const mensagem =
-        "OLÁ, ESTAMOS EM TESTES...PRECISAREMOS DE ACESSO AO SITE:\n\n" +
+        "Olá, preciso de acesso ao site:\n\n" +
 
         "SITE: " +
         (window.siteAtual.site || "") +
