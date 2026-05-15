@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SiteManager — Sistema de pesquisa de sites</title>
+  <meta name="description" content="SiteManager: sistema profissional de pesquisa, navegação e consulta de informações de sites." />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --card:#ffffff;
+      --foreground:#0f172a;
+      --muted:#f1f5f9;
+      --muted-foreground:#64748b;
+      --border:#e2e8f0;
+      --primary:#0f172a;
+      --primary-foreground:#ffffff;
+      --secondary:#f1f5f9;
+      --secondary-foreground:#0f172a;
+      --radius:10px;
+      --shadow:0 1px 2px rgba(15,23,42,.05);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--foreground);
+      line-height:1.5;
+    }
+
+    /* Header */
+    .header{border-bottom:1px solid var(--border);background:var(--card)}
+    .header-inner{
+      max-width:1024px;margin:0 auto;padding:18px 24px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-mark{
+      width:40px;height:40px;border-radius:var(--radius);
+      background:var(--primary);color:var(--primary-foreground);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .brand-title{font-size:16px;font-weight:600;line-height:1.1;margin:0}
+    .brand-sub{font-size:12px;color:var(--muted-foreground)}
+    .header-logo{height:40px;width:auto;object-fit:contain;display:block}
+
+    /* Main */
+    main{max-width:1024px;margin:0 auto;padding:40px 24px}
+    .hero{
+      border:1px solid var(--border);background:var(--card);
+      border-radius:12px;padding:32px;box-shadow:var(--shadow);margin-bottom:24px;
+    }
+    .eyebrow{
+      font-size:11px;font-weight:600;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--muted-foreground);margin:0 0 8px;
+    }
+    .hero h2{font-size:28px;margin:0 0 6px;letter-spacing:-.01em}
+    .hero p{margin:0;color:var(--muted-foreground)}
+    .hero .credit{margin-top:14px;font-size:14px}
+    .hero .credit strong{color:var(--foreground);font-weight:600}
+
+    .card{
+      border:1px solid var(--border);background:var(--card);
+      border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;
+    }
+    .card-header{padding:20px 24px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .card-header h3{margin:0;font-size:15px;font-weight:600}
+    .card-header p{margin:2px 0 0;font-size:13px;color:var(--muted-foreground)}
+    .card-body{padding:20px 24px}
+
+    /* Search */
+    .search{position:relative;margin-bottom:16px}
+    .search input{
+      width:100%;height:40px;padding:0 12px 0 36px;
+      border:1px solid var(--border);border-radius:8px;
+      background:#fff;font-size:14px;color:var(--foreground);outline:none;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .search input:focus{border-color:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.2)}
+    .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted-foreground)}
+
+    /* Buttons */
+    .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:640px){.actions{grid-template-columns:repeat(4,1fr)}}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:500;
+      cursor:pointer;border:1px solid transparent;transition:opacity .15s,background .15s;
+    }
+    .btn-primary{background:var(--primary);color:var(--primary-foreground)}
+    .btn-primary:hover{opacity:.9}
+    .btn-secondary{background:var(--secondary);color:var(--secondary-foreground)}
+    .btn-secondary:hover{background:#e2e8f0}
+    .btn-outline{background:#fff;border-color:var(--border);color:var(--foreground)}
+    .btn-outline:hover{background:var(--muted)}
+    .btn-ghost{background:transparent;color:var(--foreground);height:32px;padding:0 10px;font-size:13px}
+    .btn-ghost:hover{background:var(--muted)}
+
+    .empty{
+      display:flex;align-items:center;justify-content:center;
+      height:160px;border:1px dashed var(--border);border-radius:10px;
+      color:var(--muted-foreground);font-size:14px;
+    }
+
+    footer{border-top:1px solid var(--border)}
+    .footer-inner{max-width:1024px;margin:0 auto;padding:16px 24px;
+      font-size:12px;color:var(--muted-foreground)}
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <!-- pin icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">SiteManager</h1>
+          <div class="brand-sub">Sistema de pesquisa de sites</div>
+        </div>
+      </div>
+
+      <!-- Logo Claro à direita, na mesma linha do topo -->
+      <img src="claro_logo.jpg" alt="Claro" class="header-logo" />
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Plataforma interna</p>
+      <h2>SiteManager</h2>
+      <p>Sistema de pesquisa de sites</p>
+      <p class="credit">
+        Sistema em desenvolvimento por <strong>Marcelo Isaías dos Santos</strong>
+        — última atualização 15/05/2026
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h3>Pesquisar site</h3>
+          <p>Digite o nome ou endereço para localizar.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" placeholder="Buscar site..." />
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Buscar
+          </button>
+          <button class="btn btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            Dirigir
+          </button>
+          <button class="btn btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            Informações
+          </button>
+          <button class="btn btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h3>Detalhes</h3>
+        <button class="btn btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          Fechar
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="empty">Selecione um site para ver as informações.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">© 2026 SiteManager — Marcelo Isaías dos Santos</div>
+  </footer>
+
+</body>
+</html>
