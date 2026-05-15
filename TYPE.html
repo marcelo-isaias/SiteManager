@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        SiteManager — Sistema de pesquisa de sites
+    </title>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid #ddd;
+            padding: 20px;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background: #d32f2f;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-claro {
+            width: 90px;
+            height: auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-buscar {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .btn-dirigir {
+            background: #1976d2;
+            color: white;
+        }
+
+        .btn-info {
+            background: #455a64;
+            color: white;
+        }
+
+        .btn-reset {
+            background: #777;
+            color: white;
+        }
+
+        .resultado p {
+            margin: 10px 0;
+            font-size: 15px;
+        }
+
+        #janelaInfo {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 5%;
+            width: 90%;
+            height: 85%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        #janelaHeader {
+            background: #d32f2f;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #janelaInfoTexto {
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100% - 70px);
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        @media (max-width: 700px) {
+
+            .buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="header-content">
+
+        <div class="header-left">
+
+            <div class="icon-box">
+
+                <!-- SVG SiteManager -->
+
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+
+            </div>
+
+            <div>
+
+                <h1 style="margin:0;">
+                    SiteManager
+                </h1>
+
+                <p style="margin:5px 0; color:#666;">
+                    Sistema de pesquisa de sites
+                </p>
+
+                <p style="margin:0; font-size:12px; color:#888;">
+                    Sistema em desenvolvimento por Marcelo Isaías dos Santos
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- LOGO CLARO -->
+
+        <img
+            src="logo-claro.png"
+            alt="Logo Claro"
+            class="logo-claro"
+        >
+
+    </div>
+
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>
+            Pesquisar Site
+        </h2>
+
+        <input
+            type="text"
+            id="siteInput"
+            list="listaSites"
+            placeholder="Digite o nome do site"
+        >
+
+        <datalist id="listaSites"></datalist>
+
+        <div class="buttons">
+
+            <button
+                class="btn-buscar"
+                onclick="buscarSite()"
+            >
+                Buscar
+            </button>
+
+            <button
+                class="btn-dirigir"
+                onclick="dirigir()"
+            >
+                Dirigir
+            </button>
+
+            <button
+                class="btn-info"
+                onclick="info()"
+            >
+                Informações
+            </button>
+
+            <button
+                class="btn-reset"
+                onclick="resetar()"
+            >
+                Reset
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="card resultado">
+
+        <h2>
+            Resultado
+        </h2>
+
+        <p id="tecnico"></p>
+
+        <p id="area"></p>
+
+        <p id="endereco"></p>
+
+    </div>
+
+</div>
+
+<!-- JANELA INFO -->
+
+<div id="janelaInfo">
+
+    <div id="janelaHeader">
+
+        <h3 style="margin:0;">
+            Informações do Site
+        </h3>
+
+        <button
+            onclick="fecharInfo()"
+            style="
+                background:white;
+                color:black;
+                border:none;
+                padding:8px 12px;
+                border-radius:6px;
+                cursor:pointer;
+            "
+        >
+            Fechar
+        </button>
+
+    </div>
+
+    <div id="janelaInfoTexto"></div>
+
+</div>
+
+<footer>
+
+    © 2026 SiteManager — Marcelo Isaías dos Santos
+
+</footer>
+
+<script>
+
+let sites = [];
+
+async function carregarDados() {
+
+    const url =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTEQpZbRDkEa41zRYcY-kUqjobz3Ex4KVLVuQZg4f_mMQZGGjQ752n843gr2J2HdgrjwnsduJJr8VP3/pub?output=csv";
+
+    const resposta = await fetch(url);
+
+    const csv = await resposta.text();
+
+    const resultado = Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true
+    });
+
+    sites = resultado.data;
+
+    configurarAutocomplete();
+}
+
+function configurarAutocomplete() {
+
+    const datalist =
+        document.getElementById("listaSites");
+
+    datalist.innerHTML = "";
+
+    sites.forEach(site => {
+
+        if (!site.site) return;
+
+        const option =
+            document.createElement("option");
+
+        option.value = site.site;
+
+        datalist.appendChild(option);
+    });
+}
+
+function buscarSite() {
+
+    const nome = document
+        .getElementById("siteInput")
+        .value
+        .trim()
+        .toUpperCase();
+
+    const site = sites.find(
+        s => s.site?.toUpperCase() === nome
+    );
+
+    if (!site) {
+
+        alert("Site não encontrado");
+        return;
+    }
+
+    document.getElementById("tecnico").innerText =
+        "Técnico: " + (site.tecnico || "");
+
+    document.getElementById("area").innerText =
+        "Área: " + (site.area || "");
+
+    document.getElementById("endereco").innerText =
+        "Endereço: " + (site.endereco || "");
+
+    window.siteAtual = site;
+}
+
+function dirigir() {
+
+    if (!window.siteAtual) return;
+
+    let url = "";
+
+    if (
+        window.siteAtual.latitude &&
+        window.siteAtual.longitude
+    ) {
+
+        url =
+            "https://www.google.com/maps?q=" +
+            window.siteAtual.latitude +
+            "," +
+            window.siteAtual.longitude;
+
+    } else {
+
+        url =
+            "https://www.google.com/maps/search/?api=1&query=" +
+            encodeURIComponent(
+                window.siteAtual.endereco
+            );
+    }
+
+    window.open(url, "_blank");
+}
+
+function info() {
+
+    if (!window.siteAtual) return;
+
+    let texto = "";
+
+    Object.keys(window.siteAtual).forEach(chave => {
+
+        let valor = window.siteAtual[chave];
+
+        if (
+            valor &&
+            valor !== "0" &&
+            valor !== ""
+        ) {
+
+            texto +=
+                "<b>" +
+                chave.toUpperCase() +
+                ":</b> " +
+                valor +
+                "<br><br>";
+        }
+    });
+
+    document.getElementById(
+        "janelaInfoTexto"
+    ).innerHTML = texto;
+
+    document.getElementById(
+        "janelaInfo"
+    ).style.display = "block";
+}
+
+function fecharInfo() {
+
+    document.getElementById(
+        "janelaInfo"
+    ).style.display = "none";
+}
+
+function resetar() {
+
+    document.getElementById(
+        "siteInput"
+    ).value = "";
+
+    document.getElementById(
+        "tecnico"
+    ).innerText = "";
+
+    document.getElementById(
+        "area"
+    ).innerText = "";
+
+    document.getElementById(
+        "endereco"
+    ).innerText = "";
+
+    window.siteAtual = null;
+}
+
+carregarDados();
+
+</script>
+
+</body>
+</html>
