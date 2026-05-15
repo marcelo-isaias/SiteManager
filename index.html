@@ -332,8 +332,6 @@
         <input
             type="text"
             id="siteInput"
-            onkeypress="if(event.key==='Enter') buscarSite()"
-        />
             list="listaSites"
             placeholder="Digite o nome do site"
         >
@@ -550,7 +548,7 @@ function buscarSite() {
         "Técnico: " + (site.tecnico || "");
 
     document.getElementById("area").innerText =
-        "Área: " + (site.area || "");
+        "Área: " + (site.subarea || "");
 
     document.getElementById("endereco").innerText =
         "Endereço: " + (site.endereco || "");
